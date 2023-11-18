@@ -79,6 +79,9 @@ with DAG('weather_dag',
         response_filter= lambda r: json.loads(r.text),
         log_response=True
         )
-        
+        task3 = PythonOperator(
+        task_id= 'transform_load_weather_data',
+        python_callable=transform_load_data
+        )
         
         task1 >> task2 >> task3
