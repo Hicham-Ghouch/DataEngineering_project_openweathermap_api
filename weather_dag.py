@@ -7,6 +7,9 @@ from airflow.operators.python import PythonOperator
 import pandas as pd
 
 
+city="Casablanca"
+api_key="78473bee9d873d037f40f811283b49ab"
+
 def kelvin_to_fahrenheit(temp_in_kelvin):
     temp_in_fahrenheit = (temp_in_kelvin - 273.15) * (9/5) + 32
     return temp_in_fahrenheit
@@ -46,7 +49,7 @@ def transform_load_data(task_instance):
     now = datetime.now()
     dt_string = now.strftime("%d%m%Y%H%M%S")
     dt_string = 'current_weather_data_portland_' + dt_string
-    df_data.to_csv(f"data/{dt_string}.csv", index=False)
+    df_data.to_csv(f"s3://weather-api-bucket0/{dt_string}.csv", index=False)
 
 
 
@@ -69,12 +72,12 @@ with DAG('weather_dag',
         task1 = HttpSensor(
         task_id ='weather_api_is_ready',
         http_conn_id='weather_api',
-        endpoint='/data/2.5/weather?q=Casablanca&APPID=78473bee9d873d037f40f811283b49ab'
+        endpoint=f'/data/2.5/weather?q={city}&APPID={api_key}',
         )
         task2 = SimpleHttpOperator(
         task_id = 'extract_weather_data',
         http_conn_id = 'weather_api',
-        endpoint='/data/2.5/weather?q=Casablanca&APPID=78473bee9d873d037f40f811283b49ab',
+        endpoint=f'/data/2.5/weather?q={city}&APPID={api_key}',
         method = 'GET',
         response_filter= lambda r: json.loads(r.text),
         log_response=True
