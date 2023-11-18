@@ -71,6 +71,14 @@ with DAG('weather_dag',
         http_conn_id='weather_api',
         endpoint='/data/2.5/weather?q=Casablanca&APPID=78473bee9d873d037f40f811283b49ab'
         )
+        task2 = SimpleHttpOperator(
+        task_id = 'extract_weather_data',
+        http_conn_id = 'weather_api',
+        endpoint='/data/2.5/weather?q=Casablanca&APPID=78473bee9d873d037f40f811283b49ab',
+        method = 'GET',
+        response_filter= lambda r: json.loads(r.text),
+        log_response=True
+        )
         
         
         task1 >> task2 >> task3
